@@ -6,15 +6,11 @@ from collections import defaultdict
 app = Flask(__name__)
 CORS(app)
 
-
 RESPUESTAS_FILE = "respuestas.json"
 
 @app.route("/")
 def home():
     return "✅ API de Encuesta Activa"
-
-# Resto de tu código...
-
 
 @app.route("/preguntas")
 def preguntas():
@@ -56,13 +52,22 @@ def guardar_respuestas():
 
 @app.route("/estadisticas", methods=["GET"])
 def estadisticas():
-try:
-@@ -71,7 +18,7 @@ def estadisticas():
-return jsonify(resultado)
+    try:
+        with open(RESPUESTAS_FILE, "r", encoding="utf-8") as f:
+            respuestas = json.load(f)
 
-except FileNotFoundError:
+        conteo = defaultdict(lambda: defaultdict(int))
+
+        for respuesta in respuestas:
+            for pregunta_id, opcion in respuesta.items():
+                conteo[pregunta_id][opcion] += 1
+
+        resultado = {pid: dict(opciones) for pid, opciones in conteo.items()}
+        return jsonify(resultado)
+
+    except FileNotFoundError:
         return jsonify({})  # Si no hay respuestas todavía
-        return jsonify({})
 
-except Exception as e:
-print("❌ Error al calcular estadísticas:", e)
+    except Exception as e:
+        print("❌ Error al calcular estadísticas:", e)
+        return jsonify({"error": str(e)}), 500
