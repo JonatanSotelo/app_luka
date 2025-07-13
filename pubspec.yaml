@@ -30,7 +30,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^1.2.1
+  http: ^1.1.0
+  fl_chart: ^0.66.0
+
 
 
 
