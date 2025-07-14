@@ -49,23 +49,39 @@ class _PantallaResultadosState extends State<PantallaResultados> {
 
     return Scaffold(
       appBar: AppBar(title: Text("Resultados")),
-      body: ListView.builder(
-        itemCount: estadisticas.length,
-        itemBuilder: (context, index) {
-          final preguntaId = estadisticas.keys.elementAt(index);
-          final opciones = estadisticas[preguntaId]!;
+      body: ListView(
+        padding: const EdgeInsets.all(16.0),
+        children: [
+          ...estadisticas.entries.map((entry) {
+            final preguntaId = entry.key;
+            final opciones = entry.value;
 
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+            return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("Pregunta $preguntaId", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                SizedBox(height: 200, child: BarChart(_crearGrafico(opciones))),
+                Text(
+                  "Pregunta $preguntaId",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  height: 200,
+                  child: BarChart(_crearGrafico(opciones)),
+                ),
+                SizedBox(height: 24),
               ],
+            );
+          }).toList(),
+
+          // Botón al final para volver al inicio
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.popUntil(context, (route) => route.isFirst);
+              },
+              child: Text("Volver al inicio"),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }
@@ -96,11 +112,14 @@ class _PantallaResultadosState extends State<PantallaResultados> {
             showTitles: true,
             getTitlesWidget: (value, _) {
               final index = value.toInt();
-              final clave = opciones.keys.elementAt(index);
-              return Padding(
-                padding: const EdgeInsets.only(top: 8.0),
-                child: Text(clave, style: TextStyle(fontSize: 12)),
-              );
+              final claves = opciones.keys.toList();
+              if (index >= 0 && index < claves.length) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(claves[index], style: TextStyle(fontSize: 12)),
+                );
+              }
+              return SizedBox.shrink();
             },
           ),
         ),
