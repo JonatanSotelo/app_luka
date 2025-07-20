@@ -12,19 +12,16 @@ class PantallaInicio extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => PantallaPreguntas()),
+                  MaterialPageRoute(builder: (_) => PantallaPreguntas()),
                 );
               },
               child: Text("Responder preguntas"),
             ),
-            SizedBox(height: 20),
+            SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () {
-                // En Android, esto no cierra la app, pero simula salir.
-                Navigator.pop(context);
-              },
+              onPressed: () => Navigator.of(context).pop(),
               child: Text("Salir"),
             ),
           ],

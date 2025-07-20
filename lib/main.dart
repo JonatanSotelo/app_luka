@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pantalla_preguntas.dart';
+import 'pantalla_inicio.dart';
 
 void main() {
   runApp(EncuestaApp());
@@ -11,7 +11,7 @@ class EncuestaApp extends StatelessWidget {
     return MaterialApp(
       title: 'Encuesta Beta',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: PantallaPreguntas(),
+      home: PantallaInicio(),
     );
   }
 }
