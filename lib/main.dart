@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../app_luka_backend/pantalla_preguntas.dart';
+import 'pantalla_preguntas.dart';
 
 void main() {
   runApp(EncuestaApp());

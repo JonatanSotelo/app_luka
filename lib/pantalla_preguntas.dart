@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'pantalla_resultados.dart'; // ⬅️ importante
+import 'pantalla_resultado_por_pregunta.dart';
 
 class PantallaPreguntas extends StatefulWidget {
   @override
@@ -9,9 +9,9 @@ class PantallaPreguntas extends StatefulWidget {
 }
 
 class _PantallaPreguntasState extends State<PantallaPreguntas> {
-  List preguntas = [];
-  Map<int, String> respuestas = {};
+  List<dynamic> preguntas = [];
   int preguntaActual = 0;
+  Map<int, String> respuestas = {};
 
   @override
   void initState() {
@@ -21,54 +21,46 @@ class _PantallaPreguntasState extends State<PantallaPreguntas> {
 
   Future<void> cargarPreguntas() async {
     final url = Uri.parse('https://app-luka.onrender.com/preguntas');
-    try {
-      final response = await http.get(url);
+    final response = await http.get(url);
 
-      print('Respuesta: ${response.body}');
-      if (response.statusCode == 200) {
-        setState(() {
-          preguntas = json.decode(response.body);
-        });
-      } else {
-        print('Error al cargar preguntas: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error de conexión: $e');
-    }
-  }
-
-  void guardarRespuesta(String respuesta) {
-    respuestas[preguntaActual] = respuesta;
-    if (preguntaActual < preguntas.length - 1) {
+    if (response.statusCode == 200) {
       setState(() {
-        preguntaActual++;
+        preguntas = json.decode(response.body);
+        preguntaActual = 0;
+        respuestas.clear();
       });
     } else {
-      enviarRespuestas(respuestas).then((_) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => PantallaResultados(respuestas: respuestas),
-          ),
-        );
-      });
+      print('❌ Error al cargar preguntas');
     }
   }
 
-  Future<void> enviarRespuestas(Map<int, String> respuestas) async {
-    final url = Uri.parse('https://app-luka.onrender.com/responder');
-    try {
-      final body = jsonEncode(
-          respuestas.map((k, v) => MapEntry(k.toString(), v))); // convertir claves a string
-      final response = await http.post(
-        url,
-        headers: {"Content-Type": "application/json"},
-        body: body,
-      );
-      print("🔁 Respuesta del backend: ${response.body}");
-    } catch (e) {
-      print("❌ Error al enviar respuestas: $e");
-    }
+  void responder(String opcion) async {
+    respuestas[preguntaActual] = opcion;
+
+    final preguntaId = preguntaActual.toString();
+
+    await http.post(
+      Uri.parse('https://app-luka.onrender.com/responder'),
+      headers: {"Content-Type": "application/json"},
+      body: json.encode({preguntaId: opcion}),
+    );
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PantallaResultadoPorPregunta(
+          preguntaId: preguntaId,
+          esUltima: preguntaActual == preguntas.length - 1,
+          onSiguiente: () {
+            if (preguntaActual < preguntas.length - 1) {
+              setState(() {
+                preguntaActual++;
+              });
+            }
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -80,28 +72,20 @@ class _PantallaPreguntasState extends State<PantallaPreguntas> {
       );
     }
 
-    final pregunta = preguntas[preguntaActual];
+    final pregunta = preguntas[preguntaActual]['texto'];
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Pregunta ${preguntaActual + 1} de ${preguntas.length}"),
-      ),
+      appBar: AppBar(title: Text("Pregunta ${preguntaActual + 1}/${preguntas.length}")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
-              pregunta['texto'],
-              style: TextStyle(fontSize: 20),
-            ),
-            SizedBox(height: 20),
-            ...(pregunta['opciones'] as List).map((opcion) {
-              return ElevatedButton(
-                onPressed: () => guardarRespuesta(opcion),
-                child: Text(opcion),
-              );
-            }).toList(),
+            Text(pregunta, style: TextStyle(fontSize: 20)),
+            SizedBox(height: 24),
+            ElevatedButton(onPressed: () => responder("Sí"), child: Text("Sí")),
+            ElevatedButton(onPressed: () => responder("No"), child: Text("No")),
+            ElevatedButton(onPressed: () => responder("No sé"), child: Text("No sé")),
           ],
         ),
       ),

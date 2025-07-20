@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:fl_chart/fl_chart.dart';
+import 'package:http/http.dart' as http;
+import 'package:pie_chart/pie_chart.dart';
 
 class PantallaResultados extends StatefulWidget {
   final Map<int, String> respuestas;
@@ -63,16 +63,11 @@ class _PantallaResultadosState extends State<PantallaResultados> {
                   "Pregunta $preguntaId",
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(
-                  height: 200,
-                  child: BarChart(_crearGrafico(opciones)),
-                ),
-                SizedBox(height: 24),
+                SizedBox(height: 200, child: PieChart(dataMap: opciones.map((k, v) => MapEntry(k, v.toDouble())))),
+                SizedBox(height: 32),
               ],
             );
           }).toList(),
-
-          // Botón al final para volver al inicio
           Center(
             child: ElevatedButton(
               onPressed: () {
@@ -82,47 +77,6 @@ class _PantallaResultadosState extends State<PantallaResultados> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  BarChartData _crearGrafico(Map<String, int> opciones) {
-    final barGroups = opciones.entries.map((entry) {
-      final index = opciones.keys.toList().indexOf(entry.key);
-      return BarChartGroupData(
-        x: index,
-        barRods: [
-          BarChartRodData(
-            toY: entry.value.toDouble(),
-            width: 20,
-            borderRadius: BorderRadius.circular(4),
-          ),
-        ],
-      );
-    }).toList();
-
-    return BarChartData(
-      barGroups: barGroups,
-      titlesData: FlTitlesData(
-        leftTitles: AxisTitles(
-          sideTitles: SideTitles(showTitles: true),
-        ),
-        bottomTitles: AxisTitles(
-          sideTitles: SideTitles(
-            showTitles: true,
-            getTitlesWidget: (value, _) {
-              final index = value.toInt();
-              final claves = opciones.keys.toList();
-              if (index >= 0 && index < claves.length) {
-                return Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Text(claves[index], style: TextStyle(fontSize: 12)),
-                );
-              }
-              return SizedBox.shrink();
-            },
-          ),
-        ),
       ),
     );
   }
