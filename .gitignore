@@ -1,45 +1,57 @@
-# Miscellaneous
+# === ARCHIVOS GENERALES QUE NO SE DEBEN VERSIONAR ===
 *.class
 *.log
 *.pyc
 *.swp
 .DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+*.tmp
+*.bak
 
-# IntelliJ related
+# === CONFIGURACIONES DE EDITORES ===
+.idea/                    # IntelliJ/Android Studio
 *.iml
 *.ipr
 *.iws
-.idea/
+.vscode/                 # VSCode (solo si no querés versionar settings locales)
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# === DIRECTORIOS DE FLUTTER Y DART ===
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
-.pub-cache/
+.packages
 .pub/
-/build/
+.pub-cache/
+build/                   # Carpeta de compilación (Android/iOS/Web)
+**/doc/api/
+**/ios/Flutter/.last_build_id
 
-# Symbolication related
+# === FLUTTER ESPECÍFICO (ANDROID, iOS, Web, etc.) ===
+android/app/debug/
+android/app/profile/
+android/app/release/
+macos/Pods/
+ios/Pods/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+web/.dart_tool/
+
+# === ARCHIVOS DE SIMBOLICACIÓN Y OFUSCACIÓN ===
 app.*.symbols
-
-# Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# === FLASK / PYTHON BACKEND ===
+__pycache__/
+*.pyc
+env/
+venv/
+instance/
+*.sqlite3
+*.db
+
+# === ARCHIVOS DE TU APP QUE NO DEBEN VERSIONARSE ===
+respuestas.json          # Respuestas acumuladas, se generan en runtime
+.metadata                # Archivo interno de Flutter
+README_encuesta_app.md   # Resumen temporal que usás internamente
+
+# === MIGRACIONES TEMPORALES (SI USÁS FLASK-MIGRATE) ===
+migrate_working_dir/
