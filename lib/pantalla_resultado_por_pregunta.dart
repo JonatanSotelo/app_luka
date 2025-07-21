@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pie_chart/pie_chart.dart';
-import 'pantalla_preguntas.dart';
 
 class PantallaResultadoPorPregunta extends StatefulWidget {
   final String preguntaId;
@@ -47,37 +46,48 @@ class _PantallaResultadoPorPreguntaState extends State<PantallaResultadoPorPregu
 
   @override
   Widget build(BuildContext context) {
-    if (resultados.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(title: Text("Resultados")),
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-
     return Scaffold(
-      appBar: AppBar(title: Text("Resultados de la pregunta")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Text("Participaron $total personas", style: TextStyle(fontSize: 18)),
-            SizedBox(height: 16),
-            Expanded(child: PieChart(dataMap: resultados)),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                if (widget.esUltima) {
-                  Navigator.popUntil(context, (route) => route.isFirst);
-                } else {
-                  widget.onSiguiente();
-                  Navigator.pop(context);
-                }
-              },
-              child: Text(widget.esUltima ? "Volver al inicio" : "Siguiente pregunta"),
+      appBar: AppBar(title: Text("Resultado")),
+      body: resultados.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "¿Te parece nutritivo el contenido de los programas de TV argentinos?",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                  ),
+                  SizedBox(height: 10),
+                  Text("Total de participantes: $total"),
+                  ...resultados.entries.map(
+                    (e) => Text("${e.key}: ${e.value.toInt()} votos"),
+                  ),
+                  SizedBox(height: 24),
+                  resultados.length > 1
+                      ? SizedBox(
+                          height: 200,
+                          child: PieChart(dataMap: resultados),
+                        )
+                      : Text(
+                          "Aún no hay suficientes respuestas para generar una gráfica.",
+                          style: TextStyle(fontStyle: FontStyle.italic),
+                        ),
+                  SizedBox(height: 24),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        widget.onSiguiente(); // 👉 Esto debe ir después del pop
+                      },
+                      child: Text(widget.esUltima ? "Volver al inicio" : "Próxima pregunta"),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }
