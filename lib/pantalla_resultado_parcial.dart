@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -65,39 +64,9 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: conteo.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("⚠️ No hay estadísticas para esta pregunta aún."),
-                    SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        if (widget.preguntaIndex < widget.totalPreguntas - 1) {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PantallaPreguntas(),
-                            ),
-                          );
-                        } else {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PantallaInicio(),
-                            ),
-                          );
-                        }
-                      },
-                      child: Text(widget.preguntaIndex < widget.totalPreguntas - 1
-                          ? "Próxima pregunta"
-                          : "Finalizar y volver al inicio"),
-                    ),
-                  ],
-                ),
-              )
+            ? Center(child: CircularProgressIndicator())
             : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     preguntaTexto,
