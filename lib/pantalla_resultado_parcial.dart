@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -87,7 +88,8 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => PantallaPreguntas(),
+                            builder: (_) => PantallaPreguntas(
+                                desdePregunta: widget.preguntaIndex + 1),
                           ),
                         );
                       } else {

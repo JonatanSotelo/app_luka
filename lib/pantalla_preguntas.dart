@@ -1,9 +1,14 @@
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'pantalla_resultado_parcial.dart';
 
 class PantallaPreguntas extends StatefulWidget {
+  final int? desdePregunta;
+
+  PantallaPreguntas({this.desdePregunta});
+
   @override
   _PantallaPreguntasState createState() => _PantallaPreguntasState();
 }
@@ -26,7 +31,7 @@ class _PantallaPreguntasState extends State<PantallaPreguntas> {
     if (response.statusCode == 200) {
       setState(() {
         preguntas = json.decode(response.body);
-        preguntaActual = 0;
+        preguntaActual = widget.desdePregunta ?? 0;
         respuestas.clear();
       });
     } else {
