@@ -54,7 +54,7 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
         });
       }
     } catch (e) {
-      print("❌ Error al cargar datos: $e");
+      print("❌ Error al cargar datos: \$e");
     }
   }
 
@@ -65,7 +65,37 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: conteo.isEmpty
-            ? Center(child: CircularProgressIndicator())
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text("⚠️ No hay estadísticas para esta pregunta aún."),
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        if (widget.preguntaIndex < widget.totalPreguntas - 1) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PantallaPreguntas(),
+                            ),
+                          );
+                        } else {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PantallaInicio(),
+                            ),
+                          );
+                        }
+                      },
+                      child: Text(widget.preguntaIndex < widget.totalPreguntas - 1
+                          ? "Próxima pregunta"
+                          : "Finalizar y volver al inicio"),
+                    ),
+                  ],
+                ),
+              )
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -74,11 +104,11 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  Text("Total de participantes: $totalVotos"),
+                  Text("Total de participantes: \$totalVotos"),
                   ...conteo.entries.map((entry) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text("${entry.key}: ${entry.value} votos"),
+                      child: Text("\${entry.key}: \${entry.value} votos"),
                     );
                   }).toList(),
                   SizedBox(height: 24),
@@ -88,8 +118,7 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => PantallaPreguntas(
-                                desdePregunta: widget.preguntaIndex + 1),
+                            builder: (_) => PantallaPreguntas(),
                           ),
                         );
                       } else {
