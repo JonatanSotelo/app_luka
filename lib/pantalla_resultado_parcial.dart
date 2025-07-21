@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -8,11 +9,13 @@ class PantallaResultadoParcial extends StatefulWidget {
   final int preguntaIndex;
   final Map<int, String> respuestas;
   final int totalPreguntas;
+  final VoidCallback onSiguiente;
 
   PantallaResultadoParcial({
     required this.preguntaIndex,
     required this.respuestas,
     required this.totalPreguntas,
+    required this.onSiguiente,
   });
 
   @override
@@ -53,7 +56,7 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
         });
       }
     } catch (e) {
-      print("❌ Error al cargar datos: \$e");
+      print("❌ Error al cargar datos: $e");
     }
   }
 
@@ -66,24 +69,25 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
         child: conteo.isEmpty
             ? Center(child: CircularProgressIndicator())
             : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
                     preguntaTexto,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 16),
-                  Text("Total de participantes: \$totalVotos"),
+                  Text("Total de participantes: $totalVotos"),
                   ...conteo.entries.map((entry) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text("\${entry.key}: \${entry.value} votos"),
+                      child: Text("${entry.key}: ${entry.value} votos"),
                     );
                   }).toList(),
                   SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
                       if (widget.preguntaIndex < widget.totalPreguntas - 1) {
+                        widget.onSiguiente();
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
