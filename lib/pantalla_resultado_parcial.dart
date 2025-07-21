@@ -19,6 +19,7 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
   Map<String, int> conteo = {};
   int totalVotos = 0;
   String preguntaTexto = "";
+  bool cargando = true;
 
   @override
   void initState() {
@@ -38,13 +39,15 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
           preguntasResponse.statusCode == 200) {
         final estadisticas =
             Map<String, dynamic>.from(json.decode(estadisticasResponse.body));
-        final preguntas = List<dynamic>.from(json.decode(preguntasResponse.body));
+        final preguntas =
+            List<dynamic>.from(json.decode(preguntasResponse.body));
 
         setState(() {
           conteo = Map<String, int>.from(
               estadisticas[widget.preguntaIndex.toString()] ?? {});
           totalVotos = conteo.values.fold(0, (sum, val) => sum + val);
           preguntaTexto = preguntas[widget.preguntaIndex]['texto'];
+          cargando = false;
         });
       }
     } catch (e) {
@@ -56,37 +59,36 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("Resultado")),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: conteo.isEmpty
-            ? Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: cargando
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     preguntaTexto,
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 16),
-                  Text("Total de participantes: $totalVotos"),
+                  SizedBox(height: 20),
                   ...conteo.entries.map((entry) {
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 4),
-                      child: Text("${entry.key}: ${entry.value} votos"),
-                    );
-                  }).toList(),
-                  SizedBox(height: 24),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: Text(widget.preguntaIndex < widget.totalPreguntas - 1
-                        ? "Próxima pregunta"
-                        : "Finalizar y volver al inicio"),
-                  )
+                    final porcentaje = totalVotos == 0
+                        ? 0
+                        : (entry.value / totalVotos * 100).toStringAsFixed(1);
+                    return Text("${entry.key}: ${entry.value} votos ($porcentaje%)");
+                  }),
+                  SizedBox(height: 40),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text("Siguiente pregunta"),
+                    ),
+                  ),
                 ],
               ),
-      ),
+            ),
     );
   }
 }
