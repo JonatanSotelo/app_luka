@@ -1,8 +1,8 @@
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'pantalla_resultado_parcial.dart';
+import 'pantalla_inicio.dart';
 
 class PantallaPreguntas extends StatefulWidget {
   @override
@@ -35,21 +35,29 @@ class _PantallaPreguntasState extends State<PantallaPreguntas> {
     }
   }
 
-  void responder(String opcion) {
+  Future<void> responder(String opcion) async {
     respuestas[preguntaActual] = opcion;
-    Navigator.pushReplacement(
+
+    await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => PantallaResultadoParcial(
           preguntaIndex: preguntaActual,
-          respuestas: respuestas,
           totalPreguntas: preguntas.length,
-          onSiguiente: () {
-            setState(() => preguntaActual++);
-          },
         ),
       ),
     );
+
+    if (preguntaActual < preguntas.length - 1) {
+      setState(() {
+        preguntaActual++;
+      });
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => PantallaInicio()),
+      );
+    }
   }
 
   @override

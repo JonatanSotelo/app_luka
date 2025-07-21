@@ -1,26 +1,18 @@
-
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'pantalla_inicio.dart';
-import 'pantalla_preguntas.dart';
 
 class PantallaResultadoParcial extends StatefulWidget {
   final int preguntaIndex;
-  final Map<int, String> respuestas;
   final int totalPreguntas;
-  final VoidCallback onSiguiente;
 
   PantallaResultadoParcial({
     required this.preguntaIndex,
-    required this.respuestas,
     required this.totalPreguntas,
-    required this.onSiguiente,
   });
 
   @override
-  _PantallaResultadoParcialState createState() =>
-      _PantallaResultadoParcialState();
+  _PantallaResultadoParcialState createState() => _PantallaResultadoParcialState();
 }
 
 class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
@@ -86,22 +78,7 @@ class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
                   SizedBox(height: 24),
                   ElevatedButton(
                     onPressed: () {
-                      if (widget.preguntaIndex < widget.totalPreguntas - 1) {
-                        widget.onSiguiente();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PantallaPreguntas(),
-                          ),
-                        );
-                      } else {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PantallaInicio(),
-                          ),
-                        );
-                      }
+                      Navigator.pop(context);
                     },
                     child: Text(widget.preguntaIndex < widget.totalPreguntas - 1
                         ? "Próxima pregunta"
