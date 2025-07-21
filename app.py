@@ -4,19 +4,19 @@ import psycopg2
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Para permitir peticiones desde Flutter
+CORS(app)
 
-# Conexión a PostgreSQL en Render
+# ✅ Conexión a PostgreSQL externa (Render)
 conn = psycopg2.connect(
-    host="dpg-d1ac4nadbo4c73cbsf0g-a",
+    host="dpg-d1ac4nadbo4c73cbefog-a.oregon-postgres.render.com",
     port=5432,
     dbname="preguntas_json",
     user="preguntas_json_user",
-    password="TU_PASSWORD_AQUI"
+    password="4u8OJ6mNY4vwNjc88VaNbCRtKMRSjG9w"
 )
 cursor = conn.cursor()
 
-# Crear tabla si no existe (solo la primera vez)
+# ✅ Crear tabla si no existe
 def crear_tabla():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS respuestas (

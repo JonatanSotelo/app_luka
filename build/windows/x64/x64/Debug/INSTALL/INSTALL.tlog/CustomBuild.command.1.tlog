@@ -1,0 +1,10 @@
+^C:\USERS\U507202\DOCUMENTS\PROGRAMACION RECURSOS\APP_LUKA5\ENCUESTA_APP\BUILD\WINDOWS\X64\CMAKEFILES\C32D0445C62441C952DF5CA8DD61675A\INSTALL_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
