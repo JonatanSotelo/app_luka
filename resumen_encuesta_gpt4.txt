@@ -1,0 +1,72 @@
+Proyecto de Encuesta Flutter + Flask - Resumen para GPT-4
+===========================================================
+
+Este archivo resume todo el proyecto realizado, para que la versión GPT-4 pueda entender el contexto y retomar el trabajo correctamente.
+
+1. TECNOLOGÍAS UTILIZADAS
+--------------------------
+Frontend: Flutter
+Backend: Flask (con almacenamiento local en JSON)
+Gráficos: Paquete `pie_chart` de Flutter
+Backend hospedado temporalmente en Render.com
+Control de versiones mediante GitHub
+
+2. FUNCIONAMIENTO GENERAL
+--------------------------
+- La app inicia con una pantalla que tiene dos botones:
+    • "Responder preguntas"
+    • "Salir"
+
+- Cuando el usuario hace clic en "Responder preguntas":
+    • Se consulta el endpoint `/preguntas` de la API en Flask para obtener una lista de preguntas.
+    • El usuario responde una por una, con tres opciones posibles: "Sí", "No", "No sé".
+    • Luego de cada respuesta, se guarda la respuesta y se muestra una pantalla con un gráfico circular (pie chart) indicando cuántos usuarios eligieron cada opción para esa pregunta.
+
+- Al llegar a la última pregunta:
+    • Se muestra el gráfico final (solo de esa pregunta) y un botón que permite volver a la pantalla de inicio.
+
+3. BACKEND FLASK (API)
+-----------------------
+- Endpoint `/` → Verifica que la API esté activa.
+- Endpoint `/preguntas` → Devuelve las preguntas almacenadas en `preguntas.json`.
+- Endpoint `/responder` → Recibe respuestas y las guarda en `respuestas.json`.
+- Endpoint `/estadisticas` → Devuelve estadísticas agregadas por pregunta a partir de las respuestas acumuladas.
+
+Notas:
+    - La base de datos es un archivo JSON plano (no se usa SQL).
+    - La API está pensada para fines de prueba, no para producción.
+
+4. PROBLEMAS CON RENDER
+------------------------
+Render suspendió el servicio por exceder el uso gratuito. Por lo tanto:
+    - La API puede no estar disponible sin migrar a otro hosting (Railway, Replit, etc.).
+    - Es necesario subir nuevamente el backend a GitHub y redeployar si se requiere funcionalidad online.
+
+5. FLUTTER - FLUJO Y PANTALLAS
+-------------------------------
+- main.dart: arranca la app y carga la pantalla de inicio.
+- pantalla_inicio.dart: pantalla con botones "Responder preguntas" y "Salir".
+- pantalla_preguntas.dart: muestra preguntas una a una y botones de respuesta.
+- pantalla_resultado_individual.dart: muestra un gráfico después de cada pregunta.
+- pantalla_final.dart: muestra el gráfico final de la última pregunta y botón para volver al inicio.
+
+6. OPCIONES DE RESPUESTA
+-------------------------
+Las opciones posibles para cada pregunta son:
+    - Sí
+    - No
+    - No sé
+
+7. APK
+------
+Para generar un APK final:
+    flutter clean
+    flutter pub get
+    flutter build apk --release
+
+El APK se guarda en:
+    build/app/outputs/flutter-apk/app-release.apk
+
+Este archivo se puede instalar manualmente en dispositivos Android.
+
+FIN DEL RESUMEN

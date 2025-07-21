@@ -34,9 +34,13 @@ def guardar_respuestas():
         nuevas_respuestas = request.get_json()
 
         try:
-            with open(RESPUESTAS_FILE, "r", encoding="utf-8") as f:
-                respuestas_existentes = json.load(f)
-        except FileNotFoundError:
+            if os.path.exists(RESPUESTAS_FILE) and os.path.getsize(RESPUESTAS_FILE) > 0:
+                with open(RESPUESTAS_FILE, "r", encoding="utf-8") as f:
+                    respuestas_existentes = json.load(f)
+            else:
+                respuestas_existentes = []
+        except Exception as e:
+            print("❌ Error leyendo respuestas.json:", e)
             respuestas_existentes = []
 
         respuestas_existentes.append(nuevas_respuestas)
@@ -53,6 +57,9 @@ def guardar_respuestas():
 @app.route("/estadisticas", methods=["GET"])
 def estadisticas():
     try:
+        if not os.path.exists(RESPUESTAS_FILE) or os.path.getsize(RESPUESTAS_FILE) == 0:
+            return jsonify({})  # Si no hay respuestas todavía
+
         with open(RESPUESTAS_FILE, "r", encoding="utf-8") as f:
             respuestas = json.load(f)
 
@@ -65,9 +72,10 @@ def estadisticas():
         resultado = {pid: dict(opciones) for pid, opciones in conteo.items()}
         return jsonify(resultado)
 
-    except FileNotFoundError:
-        return jsonify({})  # Si no hay respuestas todavía
-
     except Exception as e:
         print("❌ Error al calcular estadísticas:", e)
         return jsonify({"error": str(e)}), 500
+
+# 🔥 Esta línea inicia el servidor
+if __name__ == "__main__":
+    app.run(debug=True)
