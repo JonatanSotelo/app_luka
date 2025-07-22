@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 import psycopg2
 from flask_cors import CORS
@@ -34,6 +33,23 @@ crear_tabla()
 def index():
     return "✅ Backend Encuesta Luka funcionando."
 
+# ✅ Endpoint para traer preguntas desde la base
+@app.route("/preguntas", methods=["GET"])
+def obtener_preguntas():
+    try:
+        cursor.execute("SELECT id, texto, opciones FROM preguntas ORDER BY id;")
+        preguntas = cursor.fetchall()
+        resultado = []
+        for fila in preguntas:
+            resultado.append({
+                "id": fila[0],
+                "texto": fila[1],
+                "opciones": fila[2]  # PostgreSQL array -> lista en JSON
+            })
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/responder", methods=["POST"])
 def responder():
     data = request.get_json()
@@ -61,6 +77,13 @@ def estadisticas():
         resultado[pid][respuesta] = cantidad
 
     return jsonify(resultado)
+
+# ✅ Liberar recursos al finalizar
+@app.teardown_appcontext
+def cerrar_conexion(error):
+    if conn:
+        cursor.close()
+        conn.close()
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
