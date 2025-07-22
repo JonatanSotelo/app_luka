@@ -5,7 +5,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-# ✅ Conexión a PostgreSQL externa (Render)
+# ✅ Conexión a la base PostgreSQL externa (Render)
 conn = psycopg2.connect(
     host="dpg-d1ac4nadbo4c73cbefog-a.oregon-postgres.render.com",
     port=5432,
@@ -15,7 +15,7 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
-# ✅ Crear tabla si no existe
+# ✅ Crear tabla de respuestas si no existe
 def crear_tabla():
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS respuestas (
@@ -29,27 +29,12 @@ def crear_tabla():
 
 crear_tabla()
 
+# 🟢 Verificación inicial
 @app.route("/")
 def index():
     return "✅ Backend Encuesta Luka funcionando."
 
-# ✅ Endpoint para traer preguntas desde la base
-@app.route("/preguntas", methods=["GET"])
-def obtener_preguntas():
-    try:
-        cursor.execute("SELECT id, texto, opciones FROM preguntas ORDER BY id;")
-        preguntas = cursor.fetchall()
-        resultado = []
-        for fila in preguntas:
-            resultado.append({
-                "id": fila[0],
-                "texto": fila[1],
-                "opciones": fila[2]  # PostgreSQL array -> lista en JSON
-            })
-        return jsonify(resultado)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
+# 📥 Responder pregunta
 @app.route("/responder", methods=["POST"])
 def responder():
     data = request.get_json()
@@ -64,6 +49,7 @@ def responder():
 
     return jsonify({"ok": True})
 
+# 📊 Consultar estadísticas
 @app.route("/estadisticas", methods=["GET"])
 def estadisticas():
     cursor.execute("SELECT pregunta_id, respuesta, COUNT(*) FROM respuestas GROUP BY pregunta_id, respuesta;")
@@ -78,12 +64,26 @@ def estadisticas():
 
     return jsonify(resultado)
 
-# ✅ Liberar recursos al finalizar
-@app.teardown_appcontext
-def cerrar_conexion(error):
-    if conn:
-        cursor.close()
-        conn.close()
+# 📋 Obtener preguntas desde PostgreSQL
+@app.route("/preguntas", methods=["GET"])
+def obtener_preguntas():
+    try:
+        cursor.execute("SELECT id, texto, opciones FROM preguntas ORDER BY id ASC;")
+        filas = cursor.fetchall()
+        resultado = []
 
+        for fila in filas:
+            pregunta = {
+                "id": fila[0],
+                "texto": fila[1],
+                "opciones": fila[2]
+            }
+            resultado.append(pregunta)
+
+        return jsonify(resultado)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# 🚀 Iniciar servidor localmente (solo en modo debug)
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
