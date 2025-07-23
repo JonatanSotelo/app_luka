@@ -1,81 +1,94 @@
-
 import 'package:flutter/material.dart';
-import 'api_service.dart';
-import 'pantalla_preguntas.dart';
-import 'pantalla_resultado_individual.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
-class PantallaResultadoParcial extends StatelessWidget {
+class PantallaResultadoParcial extends StatefulWidget {
   final int preguntaIndex;
-  final List<Map<String, dynamic>> preguntas;
-  final Map<int, String> respuestas;
+  final int totalPreguntas;
 
   PantallaResultadoParcial({
     required this.preguntaIndex,
-    required this.preguntas,
-    required this.respuestas,
+    required this.totalPreguntas,
   });
 
   @override
+  _PantallaResultadoParcialState createState() => _PantallaResultadoParcialState();
+}
+
+class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
+  Map<String, int> conteo = {};
+  int totalVotos = 0;
+  String preguntaTexto = "";
+  bool cargando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    cargarEstadisticas();
+  }
+
+  Future<void> cargarEstadisticas() async {
+    final url = Uri.parse('https://app-luka.onrender.com/estadisticas');
+    final preguntasUrl = Uri.parse('https://app-luka.onrender.com/preguntas');
+
+    try {
+      final estadisticasResponse = await http.get(url);
+      final preguntasResponse = await http.get(preguntasUrl);
+
+      if (estadisticasResponse.statusCode == 200 &&
+          preguntasResponse.statusCode == 200) {
+        final estadisticas =
+            Map<String, dynamic>.from(json.decode(estadisticasResponse.body));
+        final preguntas =
+            List<dynamic>.from(json.decode(preguntasResponse.body));
+
+        setState(() {
+          conteo = Map<String, int>.from(
+              estadisticas[widget.preguntaIndex.toString()] ?? {});
+          totalVotos = conteo.values.fold(0, (sum, val) => sum + val);
+          preguntaTexto = preguntas[widget.preguntaIndex]['texto'];
+          cargando = false;
+        });
+      }
+    } catch (e) {
+      print("❌ Error al cargar datos: $e");
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final pregunta = preguntas[preguntaIndex];
-    final opciones = ['Sí', 'No', 'No sé'];
-
     return Scaffold(
-      appBar: AppBar(title: Text('Resultados Parciales')),
-      body: FutureBuilder<Map<String, Map<String, int>>>(
-        future: ApiService.obtenerRespuestas(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: \${snapshot.error}'));
-          } else if (!snapshot.hasData || !snapshot.data!.containsKey(pregunta['id'].toString())) {
-            return Center(child: Text('No hay datos disponibles.'));
-          }
-
-          final datos = snapshot.data![pregunta['id'].toString()]!;
-
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(pregunta['texto'], style: TextStyle(fontSize: 20)),
-              SizedBox(height: 20),
-              ...opciones.map((opcion) {
-                final cantidad = datos[opcion] ?? 0;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Text('$opcion: $cantidad respuestas'),
-                );
-              }).toList(),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  if (preguntaIndex + 1 < preguntas.length) {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PantallaPreguntas(
-                          preguntas: preguntas,
-                          preguntaActual: preguntaIndex + 1,
-                          respuestas: respuestas,
-                        ),
-                      ),
-                    );
-                  } else {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PantallaResultadoIndividual(respuestas: respuestas),
-                      ),
-                    );
-                  }
-                },
-                child: Text('Próxima pregunta'),
+      appBar: AppBar(title: Text("Resultado")),
+      body: cargando
+          ? Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    preguntaTexto,
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 20),
+                  ...conteo.entries.map((entry) {
+                    final porcentaje = totalVotos == 0
+                        ? 0
+                        : (entry.value / totalVotos * 100).toStringAsFixed(1);
+                    return Text("${entry.key}: ${entry.value} votos ($porcentaje%)");
+                  }),
+                  SizedBox(height: 40),
+                  Center(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text("Siguiente pregunta"),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          );
-        },
-      ),
+            ),
     );
   }
 }
