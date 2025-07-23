@@ -1,5 +1,7 @@
+
 import 'package:flutter/material.dart';
-import 'pantalla_preguntas.dart';
+import 'package:encuesta_app/pantalla_preguntas.dart';
+import 'package:encuesta_app/api_service.dart';
 
 class PantallaInicio extends StatelessWidget {
   @override
@@ -11,18 +13,23 @@ class PantallaInicio extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => PantallaPreguntas()),
-                );
+              onPressed: () async {
+                final preguntas = await ApiService.obtenerPreguntas();
+
+                if (preguntas.isNotEmpty) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PantallaPreguntas(preguntas: preguntas),
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('No se pudieron cargar las preguntas')),
+                  );
+                }
               },
               child: Text("Responder preguntas"),
-            ),
-            SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text("Salir"),
             ),
           ],
         ),
