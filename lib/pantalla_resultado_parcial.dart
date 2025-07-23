@@ -1,86 +1,80 @@
+
 import 'package:flutter/material.dart';
 import 'api_service.dart';
+import 'pantalla_preguntas.dart';
+import 'pantalla_resultado_individual.dart';
 
-class PantallaResultadoParcial extends StatefulWidget {
-  final int preguntaId;
-  final String preguntaTexto;
+class PantallaResultadoParcial extends StatelessWidget {
+  final int preguntaIndex;
+  final List<Map<String, dynamic>> preguntas;
+  final Map<int, String> respuestas;
 
   PantallaResultadoParcial({
-    required this.preguntaId,
-    required this.preguntaTexto,
+    required this.preguntaIndex,
+    required this.preguntas,
+    required this.respuestas,
   });
 
   @override
-  _PantallaResultadoParcialState createState() =>
-      _PantallaResultadoParcialState();
-}
-
-class _PantallaResultadoParcialState extends State<PantallaResultadoParcial> {
-  Map<String, dynamic> estadisticas = {};
-  bool cargando = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _cargarEstadisticas();
-  }
-
-  Future<void> _cargarEstadisticas() async {
-    try {
-      final datos = await ApiService.obtenerEstadisticas();
-      setState(() {
-        estadisticas = datos[widget.preguntaId.toString()] ?? {};
-        cargando = false;
-      });
-    } catch (e) {
-      print("❌ Error al cargar estadísticas: $e");
-      setState(() {
-        cargando = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final pregunta = preguntas[preguntaIndex];
+    final opciones = ['Sí', 'No', 'No sé'];
+
     return Scaffold(
-      appBar: AppBar(title: const Text("Resultado")),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: cargando
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.preguntaTexto,
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 30),
-                  ...estadisticas.entries.map((entry) {
-                    final opcion = entry.key;
-                    final cantidad = entry.value;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 5),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(opcion, style: const TextStyle(fontSize: 16)),
-                          Text("$cantidad respuestas"),
-                        ],
+      appBar: AppBar(title: Text('Resultados Parciales')),
+      body: FutureBuilder<Map<String, Map<String, int>>>(
+        future: ApiService.obtenerRespuestas(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: \${snapshot.error}'));
+          } else if (!snapshot.hasData || !snapshot.data!.containsKey(pregunta['id'].toString())) {
+            return Center(child: Text('No hay datos disponibles.'));
+          }
+
+          final datos = snapshot.data![pregunta['id'].toString()]!;
+
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(pregunta['texto'], style: TextStyle(fontSize: 20)),
+              SizedBox(height: 20),
+              ...opciones.map((opcion) {
+                final cantidad = datos[opcion] ?? 0;
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text('$opcion: $cantidad respuestas'),
+                );
+              }).toList(),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (preguntaIndex + 1 < preguntas.length) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PantallaPreguntas(
+                          preguntas: preguntas,
+                          preguntaActual: preguntaIndex + 1,
+                          respuestas: respuestas,
+                        ),
                       ),
                     );
-                  }).toList(),
-                  const SizedBox(height: 40),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.pop(context, true); // Volver a la siguiente pregunta
-                    },
-                    child: const Text("Siguiente pregunta"),
-                  ),
-                ],
+                  } else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PantallaResultadoIndividual(respuestas: respuestas),
+                      ),
+                    );
+                  }
+                },
+                child: Text('Próxima pregunta'),
               ),
+            ],
+          );
+        },
       ),
     );
   }
