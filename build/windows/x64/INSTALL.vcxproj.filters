@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\u507202\Documents\PROGRAMACION RECURSOS\app_luka5\encuesta_app\build\windows\x64\CMakeFiles\c32d0445c62441c952df5ca8dd61675a\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8A0F2D5B-FC60-39F5-B2E0-74BE32340494}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
